@@ -1,0 +1,6 @@
+samtools mpileup -aa -A -d 0 -Q 0 \
+  ${sampleID}_primer_sorted.bam \
+  | ivar consensus \
+  -t ${params.ivar_af_threshold} \
+  -m ${params.ivar_dp_threshold} \
+  -p ${sampleID}_consensus

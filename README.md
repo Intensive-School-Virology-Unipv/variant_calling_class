@@ -1,1 +1,1 @@
-# variant_calling_class
+# Variant Calling Class - Pipeline Code

@@ -1,0 +1,16 @@
+
+
+
+bowtie2-build $options.args --threads $task.cpus $fasta bowtie2/${fasta.baseName}
+
+
+
+bowtie2 \\
+    -x \$INDEX \\
+    -1 ${reads[0]} \\
+    -2 ${reads[1]} \\
+    --threads $task.cpus \\
+    $unaligned \\
+    $options.args \\
+    2> ${prefix}.bowtie2.log \\
+    | samtools view -@ $task.cpus $options.args2 -bhS -o ${prefix}.bam -

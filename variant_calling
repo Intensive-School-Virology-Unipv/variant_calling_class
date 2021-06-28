@@ -1,0 +1,23 @@
+
+
+
+ivar trim \
+  -i $bam \
+  -b $primers \
+  -e -p "${sampleID}_primer_trimmed"
+
+  samtools sort -@ ${task.cpus} -o "${sampleID}_primer_sorted.bam" "${sampleID}_primer_trimmed.bam"
+  samtools index -@ ${task.cpus} "${sampleID}_primer_sorted.bam"
+
+
+samtools mpileup \
+  -aa -A -d 0 -B -Q 0 \
+  --reference $fasta \
+  $trimmedbam \
+  | ivar variants -p "${sampleID}_variants" \
+  -t ${params.ivar_af_threshold} \
+  -m ${params.ivar_dp_threshold} \
+  -r $fasta \
+  -g $gff
+
+

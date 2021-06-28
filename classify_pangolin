@@ -1,0 +1,11 @@
+
+## collate fasta files into one
+
+
+
+## classify with pango 
+
+
+pangolin -t 32 \
+--tempdir /home/lescai/local_tmp \
+samples_multi.fasta
