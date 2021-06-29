@@ -1,16 +1,58 @@
+### create exercise folder
+
+cd ~
+mkdir -p variantlab
+cd variantlab 
 
 
+## download reference
+wget https://raw.githubusercontent.com/lescailab/testdata/master/covid19/refseq_NC_045512_covid19_wuhan.fasta .
 
-bowtie2-build $options.args --threads $task.cpus $fasta bowtie2/${fasta.baseName}
+### rename reference for convenience
+mv refseq_NC_045512_covid19_wuhan.fasta covid_reference.fasta
+
+### create folder where to put indexes
+
+mkdir -p bowtie2
+
+### run build indexes for bowtie
+
+bowtie2-build \
+--threads 2 \
+covid_reference.fasta \
+bowtie2/covid_reference
+
+### run alignment for first pair of reads
+
+cd ~/variantlab
+mkdir -p alignment
+cd alignment
+
+## this should take about 15 seconds user time on the VM
+
+bowtie2 \
+    -x ~/variantlab/bowtie2/covid_reference \
+    -1 /home/student/DATA/variant_calling/fastq/sample1_R1.fastq.gz \
+    -2 /home/student/DATA/variant_calling/fastq/sample1_R2.fastq.gz \
+    --threads 2 \
+    2> sample1_bowtie2.log \
+    | samtools view -@ 2 -bhS -o sample1.bam -
 
 
+bowtie2 \
+    -x ~/variantlab/bowtie2/covid_reference \
+    -1 /home/student/DATA/variant_calling/fastq/sample2_R1.fastq.gz \
+    -2 /home/student/DATA/variant_calling/fastq/sample2_R2.fastq.gz \
+    --threads 2 \
+    2> sample1_bowtie2.log \
+    | samtools view -@ 2 -bhS -o sample2.bam -
 
-bowtie2 \\
-    -x \$INDEX \\
-    -1 ${reads[0]} \\
-    -2 ${reads[1]} \\
-    --threads $task.cpus \\
-    $unaligned \\
-    $options.args \\
-    2> ${prefix}.bowtie2.log \\
-    | samtools view -@ $task.cpus $options.args2 -bhS -o ${prefix}.bam -
+### bam files need to be sorted and indexed
+
+samtools sort -@ 2 --write-index -o sample1_sorted.bam sample1.bam
+samtools sort -@ 2 --write-index -o sample2_sorted.bam sample2.bam
+
+### for future use this also needs to be indexed with classic .bai file
+
+samtools index sample1_sorted.bam
+samtools index sample2_sorted.bam

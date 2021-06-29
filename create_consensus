@@ -1,6 +1,26 @@
+
+##############################
+## CREATE CONSENSUS GENOME ##
+##############################
+
+
+## create folder for consensus
+
+cd ~/variantlab
+mkdir -p consensus
+cd consensus
+
 samtools mpileup -aa -A -d 0 -Q 0 \
-  ${sampleID}_primer_sorted.bam \
+  /home/student/variantlab/calls/sample1_primer_sorted.bam \
   | ivar consensus \
-  -t ${params.ivar_af_threshold} \
-  -m ${params.ivar_dp_threshold} \
-  -p ${sampleID}_consensus
+  -t 0.1 \
+  -m 5 \
+  -p sample1_consensus
+
+
+samtools mpileup -aa -A -d 0 -Q 0 \
+  /home/student/variantlab/calls/sample2_primer_sorted.bam \
+  | ivar consensus \
+  -t 0.1 \
+  -m 5 \
+  -p sample2_consensus

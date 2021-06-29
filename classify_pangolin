@@ -1,11 +1,20 @@
 
 ## collate fasta files into one
 
+cd ~/variantlab/consensus
+
+cat sample1_consensus.fa sample2_consensus.fa >samples_consensus.fa
 
 
-## classify with pango 
+################################
+#### CLASSIFY PANGO LINEAGES ###
+################################
+
+## create temp folder
+mkdir -p tmp
 
 
-pangolin -t 32 \
---tempdir /home/lescai/local_tmp \
-samples_multi.fasta
+
+pangolin -t 2 \
+--tempdir ~/variantlab/consensus/tmp \
+samples_consensus.fa

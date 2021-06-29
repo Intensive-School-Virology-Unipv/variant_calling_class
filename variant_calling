@@ -1,23 +1,71 @@
 
+## create folder for variants
+
+cd ~/variantlab
+mkdir -p calls
+cd calls
+
+### --> this can be changed once files have been uploaded as part of VM disk
+# download GFF file
+wget https://raw.githubusercontent.com/lescailab/testdata/master/covid19/GCF_009858895.2_ASM985889v3_genomic.gff .
+
+# download primers from artic
+wget https://github.com/artic-network/primer-schemes/raw/master/nCoV-2019/V1/nCoV-2019.primer.bed .
+
+## the 2 bam files have been generated in step01 and are
+bam1=/home/student/variantlab/alignment/sample1_sorted.bam
+bam2=/home/student/variantlab/alignment/sample2_sorted.bam
+
+## assign files to variable to simplify exec
+primers=/home/student/variantlab/calls/nCoV-2019.primer.bed
+gff=/home/student/variantlab/calls/GCF_009858895.2_ASM985889v3_genomic.gff
+fasta=/home/student/variantlab/covid_reference.fasta
+
+
+############################
+## TRIM PRIMERS ###########
+############################
+
+ivar trim \
+  -i $bam1 \
+  -b $primers \
+  -e -p "sample1_primer_trimmed"
 
 
 ivar trim \
-  -i $bam \
+  -i $bam2 \
   -b $primers \
-  -e -p "${sampleID}_primer_trimmed"
+  -e -p "sample2_primer_trimmed"
 
-  samtools sort -@ ${task.cpus} -o "${sampleID}_primer_sorted.bam" "${sampleID}_primer_trimmed.bam"
-  samtools index -@ ${task.cpus} "${sampleID}_primer_sorted.bam"
+
+### sort and index the files 
+
+samtools sort -@ 2 --write-index -o sample1_primer_sorted.bam sample1_primer_trimmed.bam
+samtools sort -@ 2 --write-index -o sample2_primer_sorted.bam sample2_primer_trimmed.bam
+
+
+#######################################
+#### CALL THE VARIANTS ################
+#######################################
+
+samtools mpileup \
+  -aa -A -d 0 -B -Q 0 \
+  --reference $fasta \
+  sample1_primer_sorted.bam \
+  | ivar variants -p sample1_variants \
+  -t 0.01 \
+  -m 5 \
+  -r $fasta \
+  -g $gff
 
 
 samtools mpileup \
   -aa -A -d 0 -B -Q 0 \
   --reference $fasta \
-  $trimmedbam \
-  | ivar variants -p "${sampleID}_variants" \
-  -t ${params.ivar_af_threshold} \
-  -m ${params.ivar_dp_threshold} \
+  sample2_primer_sorted.bam \
+  | ivar variants -p sample2_variants \
+  -t 0.01 \
+  -m 5 \
   -r $fasta \
   -g $gff
-
 
