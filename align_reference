@@ -4,12 +4,8 @@ cd ~
 mkdir -p variantlab
 cd variantlab 
 
-
-## download reference
-wget https://raw.githubusercontent.com/lescailab/testdata/master/covid19/refseq_NC_045512_covid19_wuhan.fasta .
-
 ### rename reference for convenience
-mv refseq_NC_045512_covid19_wuhan.fasta covid_reference.fasta
+cp /home/student/DATA/variant_calling_data/refs/refseq_NC_045512_covid19_wuhan.fasta covid_reference.fasta
 
 ### create folder where to put indexes
 
@@ -32,8 +28,8 @@ cd alignment
 
 bowtie2 \
     -x ~/variantlab/bowtie2/covid_reference \
-    -1 /home/student/DATA/variant_calling/fastq/sample1_R1.fastq.gz \
-    -2 /home/student/DATA/variant_calling/fastq/sample1_R2.fastq.gz \
+    -1 /home/student/DATA/variant_calling_data/fastq/sample1_R1.fastq.gz \
+    -2 /home/student/DATA/variant_calling_data/fastq/sample1_R2.fastq.gz \
     --threads 2 \
     2> sample1_bowtie2.log \
     | samtools view -@ 2 -bhS -o sample1.bam -
@@ -41,8 +37,8 @@ bowtie2 \
 
 bowtie2 \
     -x ~/variantlab/bowtie2/covid_reference \
-    -1 /home/student/DATA/variant_calling/fastq/sample2_R1.fastq.gz \
-    -2 /home/student/DATA/variant_calling/fastq/sample2_R2.fastq.gz \
+    -1 /home/student/DATA/variant_calling_data/fastq/sample2_R1.fastq.gz \
+    -2 /home/student/DATA/variant_calling_data/fastq/sample2_R2.fastq.gz \
     --threads 2 \
     2> sample1_bowtie2.log \
     | samtools view -@ 2 -bhS -o sample2.bam -

@@ -5,20 +5,14 @@ cd ~/variantlab
 mkdir -p calls
 cd calls
 
-### --> this can be changed once files have been uploaded as part of VM disk
-# download GFF file
-wget https://raw.githubusercontent.com/lescailab/testdata/master/covid19/GCF_009858895.2_ASM985889v3_genomic.gff .
-
-# download primers from artic
-wget https://github.com/artic-network/primer-schemes/raw/master/nCoV-2019/V1/nCoV-2019.primer.bed .
 
 ## the 2 bam files have been generated in step01 and are
 bam1=/home/student/variantlab/alignment/sample1_sorted.bam
 bam2=/home/student/variantlab/alignment/sample2_sorted.bam
 
 ## assign files to variable to simplify exec
-primers=/home/student/variantlab/calls/nCoV-2019.primer.bed
-gff=/home/student/variantlab/calls/GCF_009858895.2_ASM985889v3_genomic.gff
+primers=/home/student/DATA/variant_calling_data/refs/nCoV-2019.primer.bed
+gff=/home/student/DATA/variant_calling_data/refs/GCF_009858895.2_ASM985889v3_genomic.gff
 fasta=/home/student/variantlab/covid_reference.fasta
 
 
