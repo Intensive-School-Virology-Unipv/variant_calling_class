@@ -1,0 +1,147 @@
+---
+title: "R Notebook - SARS-CoV-2 Variants Visualisation"
+output: html_notebook
+---
+
+# Visualising SARS-CoV-2 Variants
+
+```{r, include=FALSE, echo=FALSE}
+library(tidyverse)
+library(Gviz)
+library(VariantAnnotation)
+library(GenomicFeatures)
+setwd("/home/student/variantlab/calls")
+```
+
+
+## Preparing the Data
+
+We first beging linking the data we need to visualise, i.e. the sequencing results (the aligned reads, in the BAM file) and the variants we have called. 
+As an example, we will focus on sample 1.
+
+The following code stores the link to the files into R variables.
+
+```{r}
+variants <- read_tsv("/home/student/variantlab/calls/sample1_variants.tsv")
+bamfile <- "/home/student/variantlab/alignment/sample1_sorted.bam"
+```
+
+
+The variants need to be converted in a "coordinates" format (called Genomic Ranges, or GRanges in short) in order to be plotted in a graphical system.
+We do this by building a special object with the code that follows:
+
+```{r}
+vars <- GRanges(
+  variants$REGION,
+  IRanges(
+    start = variants$POS,
+    width = 1
+  )
+)
+```
+
+We also want to use the allele fraction information of the variants, which could be useful to infer any sub-population of the virus we might have sequenced in a sample.
+Therefore we will take this from the iVar file, and add it to the coordinates object of the variants as metadata, with the code that follows:
+
+
+```{r}
+vars$AF <- variants$ALT_FREQ
+```
+
+Like we did for the variant calling, we also need a file (again, in a coordinates-system object) describing the different genes composing the SARS-CoV-2 genome.
+We have already prepared this file for you, and we only have to read it into the environment:
+
+```{r}
+genomeGR <- readRDS("/home/student/DATA/variant_calling_data/refs/covid19_genome_model.RData")
+genome <- "NC_045512.2"
+```
+
+Additionally, we want to extract some other information that is needed in order to prepare the tracks:
+
+```{r}
+chr <- as.character(unique(seqnames(genomeGR)))
+gen <- genome(genomeGR)
+options(ucscChromosomeNames=FALSE)
+```
+
+
+## Assembling the Plot
+
+The plot is going to be assembled in components, also called "tracks".
+
+We start by plotting an axis with the genome coordinate:
+
+
+```{r}
+gtrack <- GenomeAxisTrack()
+```
+
+And then we want to add a general visualisation of the genome, using the file that we read above:
+
+```{r}
+atrack <- AnnotationTrack(genomeGR, name = genome)
+```
+
+And we can plot also the single genes one by one along the above track, with the following code:
+
+```{r}
+genetrack <- GeneRegionTrack(genomeGR,
+                             genome = gen,
+                             chromosome = chr,
+                             name = genome,
+                             showId = TRUE,
+                             geneSymbol = TRUE,
+                             symbol = genomeGR$gene)
+```
+
+
+Now we can start adding the data we have imported from our sample 1, and we will start with the list of the variants:
+
+
+```{r}
+variants <- AnnotationTrack(vars, 
+                            chromosome = chr, 
+                            genome = gen,
+                            name = "Variants")
+```
+
+But we also want to plot the variant allele-fractions in a separate plot: this is a well-known type of plot called "lollipop" for its shape:
+
+```{r}
+af <- DataTrack(vars, genome = gen,
+                chromosome = chr,
+                data = "AF",
+                type = c("h", "p"),
+                group = as.character(vars$Feature_Type),
+                legend = TRUE,
+                name = "Allele Fraction"
+)
+```
+
+
+We can also use the alignment information, in order to show how well each portion of the genome has been covered by the sequencing experiment: we use the following code to plot the coverage
+
+
+```{r}
+cov <- DataTrack(range = bamfile, genome = gen, type = "l",
+                 name = "Coverage", window = -1,
+                 chromosome = chr)
+```
+
+
+## Visualisation
+
+Now that we have prepared all the tracks, we just have to put them together and plot the results.
+
+Since this Virtual Machine only has a limited amount of memory, we will have to narrow down the plot to a small window of the genome, with the following code:
+
+
+```{r}
+plotTracks(list(gtrack, 
+                genetrack, 
+                variants, 
+                af, 
+                cov), 
+           from = 20000, to = 29000)
+```
+
