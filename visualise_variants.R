@@ -2,17 +2,14 @@ library(tidyverse)
 library(Gviz)
 library(VariantAnnotation)
 library(GenomicFeatures)
-setwd("~/variantlab/calls")
-
-## need to download this
-# https://github.com/lescailab/testdata/raw/master/covid19/covid19_genome_model.RData
+setwd("/home/student/variantlab/calls")
 
 
 ##########################
 ## read variants into R
 ##########################
 
-variants <- read_tsv("sample1_variants.tsv")
+variants <- read_tsv("/home/student/variantlab/calls/sample1_variants.tsv")
 bamfile <- "/home/student/variantlab/alignment/sample1_sorted.bam"
 
 
@@ -31,7 +28,7 @@ vars <- GRanges(
 ### add allele fraction for the alternative allele
 vars$AF <- variants$ALT_FREQ
 
-genomeGR <- readRDS("covid19_genome_model.RData")
+genomeGR <- readRDS("/home/student/DATA/variant_calling_data/refs/covid19_genome_model.RData")
 genome <- "NC_045512.2"
 
 chr <- as.character(unique(seqnames(genomeGR)))
